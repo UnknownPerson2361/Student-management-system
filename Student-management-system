@@ -1,0 +1,275 @@
+import json
+import os
+
+FILE = "students.json"
+
+
+def load_students():
+    if not os.path.exists(FILE):
+        return []
+
+    try:
+        with open(FILE, "r") as file:
+            return json.load(file)
+    except json.JSONDecodeError:
+        return []
+
+
+def save_students(students):
+    with open(FILE, "w") as file:
+        json.dump(students, file, indent=4)
+
+
+def add_student():
+    students = load_students()
+
+    roll = input("Enter Roll Number: ").strip()
+
+    for student in students:
+        if student["roll"] == roll:
+            print("❌ Roll number already exists!")
+            return
+
+    name = input("Enter Student Name: ").strip()
+    age = input("Enter Age: ").strip()
+    standard = input("Enter Class: ").strip()
+
+    student = {
+        "roll": roll,
+        "name": name,
+        "age": age,
+        "class": standard,
+        "marks": {}
+    }
+
+    students.append(student)
+    save_students(students)
+
+    print("✅ Student added successfully!")
+
+
+def view_students():
+    students = load_students()
+
+    if not students:
+        print("No students found.")
+        return
+
+    print("\n========== STUDENTS ==========")
+
+    for student in students:
+        print(
+            f"Roll: {student['roll']} | "
+            f"Name: {student['name']} | "
+            f"Age: {student['age']} | "
+            f"Class: {student['class']}"
+        )
+
+
+def search_student():
+    students = load_students()
+
+    roll = input("Enter Roll Number: ").strip()
+
+    for student in students:
+        if student["roll"] == roll:
+            print("\n========== STUDENT ==========")
+            print("Roll  :", student["roll"])
+            print("Name  :", student["name"])
+            print("Age   :", student["age"])
+            print("Class :", student["class"])
+            print("Marks :", student["marks"])
+            return
+
+    print("❌ Student not found!")
+
+
+def update_student():
+    students = load_students()
+
+    roll = input("Enter Roll Number: ").strip()
+
+    for student in students:
+        if student["roll"] == roll:
+
+            print("Leave blank to keep old value.")
+
+            name = input(f"Name [{student['name']}]: ").strip()
+            age = input(f"Age [{student['age']}]: ").strip()
+            standard = input(f"Class [{student['class']}]: ").strip()
+
+            if name:
+                student["name"] = name
+
+            if age:
+                student["age"] = age
+
+            if standard:
+                student["class"] = standard
+
+            save_students(students)
+
+            print("✅ Student updated successfully!")
+            return
+
+    print("❌ Student not found!")
+
+
+def delete_student():
+    students = load_students()
+
+    roll = input("Enter Roll Number: ").strip()
+
+    for student in students:
+        if student["roll"] == roll:
+
+            confirm = input(
+                f"Delete {student['name']}? (y/n): "
+            ).lower()
+
+            if confirm == "y":
+                students.remove(student)
+                save_students(students)
+                print("🗑️ Student deleted!")
+            else:
+                print("Delete cancelled.")
+
+            return
+
+    print("❌ Student not found!")
+
+
+def add_marks():
+    students = load_students()
+
+    roll = input("Enter Roll Number: ").strip()
+
+    for student in students:
+        if student["roll"] == roll:
+
+            print("\nEnter marks out of 100")
+
+            subjects = ["Math", "Science", "English", "Marathi"]
+
+            for subject in subjects:
+                while True:
+                    try:
+                        marks = float(
+                            input(f"{subject}: ")
+                        )
+
+                        if 0 <= marks <= 100:
+                            student["marks"][subject] = marks
+                            break
+
+                        print("Enter marks between 0 and 100.")
+
+                    except ValueError:
+                        print("Please enter a number.")
+
+            save_students(students)
+
+            print("✅ Marks saved successfully!")
+            return
+
+    print("❌ Student not found!")
+
+
+def show_result():
+    students = load_students()
+
+    roll = input("Enter Roll Number: ").strip()
+
+    for student in students:
+        if student["roll"] == roll:
+
+            marks = student["marks"]
+
+            if not marks:
+                print("❌ No marks available.")
+                return
+
+            total = sum(marks.values())
+            subjects = len(marks)
+            percentage = total / subjects
+
+            if percentage >= 90:
+                grade = "A+"
+            elif percentage >= 80:
+                grade = "A"
+            elif percentage >= 70:
+                grade = "B"
+            elif percentage >= 60:
+                grade = "C"
+            elif percentage >= 50:
+                grade = "D"
+            else:
+                grade = "F"
+
+            print("\n========== RESULT ==========")
+            print("Name :", student["name"])
+            print("Roll :", student["roll"])
+
+            for subject, mark in marks.items():
+                print(f"{subject}: {mark}")
+
+            print("----------------------------")
+            print(f"Total      : {total:.2f}")
+            print(f"Percentage : {percentage:.2f}%")
+            print(f"Grade      : {grade}")
+
+            return
+
+    print("❌ Student not found!")
+
+
+def main():
+    while True:
+
+        print("\n")
+        print("================================")
+        print("     STUDENT MANAGEMENT SYSTEM")
+        print("================================")
+        print("1. Add Student")
+        print("2. View Students")
+        print("3. Search Student")
+        print("4. Update Student")
+        print("5. Delete Student")
+        print("6. Add Marks")
+        print("7. Student Result")
+        print("8. Exit")
+        print("================================")
+
+        choice = input("Enter your choice: ").strip()
+
+        if choice == "1":
+            add_student()
+
+        elif choice == "2":
+            view_students()
+
+        elif choice == "3":
+            search_student()
+
+        elif choice == "4":
+            update_student()
+
+        elif choice == "5":
+            delete_student()
+
+        elif choice == "6":
+            add_marks()
+
+        elif choice == "7":
+            show_result()
+
+        elif choice == "8":
+            print("Thank you! 👋")
+            break
+
+        else:
+            print("❌ Invalid choice!")
+
+
+if __name__ == "__main__":
+    main()
